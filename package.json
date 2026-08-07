@@ -6,6 +6,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "postinstall": "npm ci --prefix src/list",
     "build": "tsc",
     "watch": "tsc -w",
     "cdk": "cdk",
