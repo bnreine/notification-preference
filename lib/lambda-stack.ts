@@ -18,6 +18,16 @@ export class LambdaStack extends cdk.Stack {
       API_GATEWAY_ID_SSM_PARAMETER,
     );
 
+      const defaultAuthorizerId = ssm.StringParameter.valueForStringParameter(
+          this,
+          "/notifications/api-gateway/api2/default-authorizer-id"
+      );
+
+      const defaultAuthorizerType = ssm.StringParameter.valueForStringParameter(
+          this,
+          "/notifications/api-gateway/api2/default-authorizer-type"
+      );
+
     const listLambdaDir = path.join(__dirname, '../../src/list');
 
     const listLambda = new NodejsFunction(this, 'PreferencesListLambda', {
@@ -34,6 +44,8 @@ export class LambdaStack extends cdk.Stack {
       region: this.region,
       apiId,
       routeKey: 'GET /configurations/{configurationId}/preferences',
+        authorizationType: defaultAuthorizerType,
+        authorizerId: defaultAuthorizerId,
     });
   }
 }

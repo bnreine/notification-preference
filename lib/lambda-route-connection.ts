@@ -8,13 +8,16 @@ export interface LambdaRouteConnectionProps {
   region: string;
   apiId: string;
   routeKey: string;
+    authorizationType: string;
+    authorizerId: string;
 }
 
 export class LambdaRouteConnection extends Construct {
   constructor(scope: Construct, id: string, props: LambdaRouteConnectionProps) {
     super(scope, id);
 
-    const { lambdaFunction, region, apiId, routeKey } = props;
+    const { lambdaFunction, region, apiId, routeKey,      authorizationType,
+        authorizerId, } = props;
 
     const integrationRole = new iam.Role(this, `${id}-integration-role`, {
       assumedBy: new iam.ServicePrincipal('apigateway.amazonaws.com'),
@@ -40,6 +43,8 @@ export class LambdaRouteConnection extends Construct {
       apiId,
       routeKey,
       target: `integrations/${integration.ref}`,
+        authorizationType,
+        authorizerId,
     });
 
     route.addResourceDependency(integration);
