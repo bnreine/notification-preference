@@ -20,12 +20,12 @@ export class LambdaStack extends cdk.Stack {
 
       const defaultAuthorizerId = ssm.StringParameter.valueForStringParameter(
           this,
-          "/notifications/api-gateway/api2/default-authorizer-id"
+          "/notifications/apigateway/api2/default-authorizer-id"
       );
 
       const defaultAuthorizerType = ssm.StringParameter.valueForStringParameter(
           this,
-          "/notifications/api-gateway/api2/default-authorizer-type"
+          "/notifications/apigateway/api2/default-authorizer-type"
       );
 
     const listLambdaDir = path.join(__dirname, '../../src/list');
