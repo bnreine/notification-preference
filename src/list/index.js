@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import doNothing from '/opt/nodejs/do-nothing'
+import doNothing from '/opt/nodejs/do-nothing.js'
 // import doNothing from '../shared/nodejs/do-nothing'
 
 export const handler = async (event) => {
