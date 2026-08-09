@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Duration, aws_ec2 } from 'aws-cdk-lib';
 import { Runtime, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import * as path from 'path';
@@ -83,6 +83,7 @@ export class LambdaStack extends cdk.Stack {
 
         bundling: {
             externalModules: ['/opt/*'],
+            format: OutputFormat.ESM,
         },
     });
 
