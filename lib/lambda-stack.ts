@@ -22,7 +22,7 @@ export class LambdaStack extends cdk.Stack {
 
 
       const vpc = aws_ec2.Vpc.fromLookup(this, 'Vpc', {
-          vpcId,
+          vpcId: 'vpc-084bacc70db0dcefd',
       });
 
 
