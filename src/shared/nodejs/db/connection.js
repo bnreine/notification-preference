@@ -11,7 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 let dbPool;
 
-const getDbPool = async () => {
+const getDbPool = async (secretName) => {
   if (dbPool) {
     return dbPool;
   }
@@ -21,7 +21,7 @@ const getDbPool = async () => {
 
     const response = await secretClient.send(
       new GetSecretValueCommand({
-        SecretId: 'write_read_rds_db',
+        SecretId: secretName,
       }),
     );
 

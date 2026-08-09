@@ -102,12 +102,20 @@ export class LambdaStack extends cdk.Stack {
         securityGroups: [lambdaSecurityGroup],
     });
 
-    const dbSecret = secretsmanager.Secret.fromSecretNameV2(
-      this,
-      'DbSecret',
-      'write_read_rds_db',
-    );
-    dbSecret.grantRead(listLambda);
+    // const writeReadRDSdbSecret = secretsmanager.Secret.fromSecretNameV2(
+    //   this,
+    //   'DbSecret',
+    //   'write_read_rds_db',
+    // );
+
+      const readOnlyRDSdbSecret = secretsmanager.Secret.fromSecretNameV2(
+          this,
+          'ReadOnlyRDSDbSecret',
+          'readonly_rds_db',
+      );
+
+
+    readOnlyRDSdbSecret.grantRead(listLambda);
 
     new LambdaRouteConnection(this, 'PreferencesListRoute', {
       lambdaFunction: listLambda,
