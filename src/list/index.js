@@ -1,5 +1,5 @@
-// import { getDbPool } from '/opt/nodejs/db/connection.js';
-import { getDbPool} from '../shared/nodejs/db/connection.js'
+import { getDbPool } from '/opt/nodejs/db/connection.js';
+// import { getDbPool} from '../shared/nodejs/db/connection.js'
 
 export const handler = async (event) => {
   const configurationId = event.pathParameters?.configurationId ?? 'unknown';
