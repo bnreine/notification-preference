@@ -155,6 +155,16 @@ export class LambdaStack extends cdk.Stack {
       timeout: Duration.seconds(29),
       projectRoot: getLambdaDir,
       depsLockFilePath: path.join(getLambdaDir, 'package-lock.json'),
+        layers: [sharedLayer],
+        bundling: {
+            externalModules: ['/opt/*'],
+            format: OutputFormat.ESM,
+        },
+        vpc,
+        vpcSubnets: {
+            subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        },
+        securityGroups: [lambdaSecurityGroup],
         // vpc,
         // vpcSubnets: {
         //     subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
@@ -162,6 +172,8 @@ export class LambdaStack extends cdk.Stack {
         // securityGroups: [getLambdaSecurityGroup],
     });
 
+
+      readOnlyRDSdbSecret.grantRead(getLambda);
 
 
 

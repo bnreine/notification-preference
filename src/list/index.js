@@ -4,7 +4,7 @@ import hal from 'halson'
 
 export const handler = async (event) => {
     try {
-        const configurationId = event.pathParameters?.configurationId ?? 'unknown';
+        const configurationId = event.pathParameters?.configurationId;
         const userId = event?.requestContext?.authorizer?.jwt?.claims?.sub;
 
         const dbPool = await getDbPool('readonly_rds_db');
