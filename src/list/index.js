@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import doNothing from './opt/nodejs/do-nothing'
+// import doNothing from '../shared/nodejs/do-nothing'
 
 export const handler = async (event) => {
   const configurationId = event.pathParameters?.configurationId ?? 'unknown';
-  const greeting = _.capitalize('hello world');
+  const greeting = doNothing();
 
   return {
     statusCode: 200,

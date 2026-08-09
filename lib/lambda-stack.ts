@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Duration, aws_ec2 } from 'aws-cdk-lib';
+import { Runtime, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -12,6 +12,30 @@ const API_GATEWAY_ID_SSM_PARAMETER = '/notifications/apigateway/api2/id';
 export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+
+      // const vpcId = ssm.StringParameter.valueForStringParameter(
+      //     this,
+      //     '/shared-resources/vpc-id',
+      // );
+      //
+      //
+      // const vpc = aws_ec2.Vpc.fromLookup(this, 'Vpc', {
+      //     vpcId,
+      // });
+      //
+      //
+      // const rdsSgId = ssm.StringParameter.valueForStringParameter(
+      //     this,
+      //     '/notifications/rds-sg-id'
+      // );
+      //
+      // const rdsSg = aws_ec2.SecurityGroup.fromSecurityGroupId(
+      //     this,
+      //     'RdsSg',
+      //     rdsSgId,
+      //     { mutable: true }
+      // );
 
     const apiId = ssm.StringParameter.valueForStringParameter(
       this,
@@ -28,6 +52,21 @@ export class LambdaStack extends cdk.Stack {
           "/notifications/apigateway/api2/default-authorizer-type"
       );
 
+
+      const sharedLayer = new LayerVersion(this, 'SharedLayer', {
+          code: Code.fromAsset(
+              path.join(__dirname, '../../src/shared')
+          ),
+
+          compatibleRuntimes: [
+              Runtime.NODEJS_22_X,
+          ],
+
+          description: 'Shared code for notification API lambdas',
+      });
+
+
+
     const listLambdaDir = path.join(__dirname, '../../src/list');
     const postLambdaDir = path.join(__dirname, '../../src/post');
     const getLambdaDir = path.join(__dirname, '../../src/get');
@@ -40,6 +79,11 @@ export class LambdaStack extends cdk.Stack {
       timeout: Duration.seconds(29),
       projectRoot: listLambdaDir,
       depsLockFilePath: path.join(listLambdaDir, 'package-lock.json'),
+        layers: [sharedLayer],
+
+        bundling: {
+            externalModules: ['/opt/*'],
+        },
     });
 
     new LambdaRouteConnection(this, 'PreferencesListRoute', {
@@ -69,6 +113,14 @@ export class LambdaStack extends cdk.Stack {
       authorizerId: defaultAuthorizerId,
     });
 
+
+
+    //   const getLambdaSecurityGroup = new aws_ec2.SecurityGroup(this, 'LambdaSecurityGroup', {
+    //       vpc,
+    //       description: 'Security group for Notification Lambda functions',
+    //       allowAllOutbound: true, // Allows the Lambda to initiate connections (e.g. to RDS)
+    //   });
+    //
     const getLambda = new NodejsFunction(this, 'PreferencesGetLambda', {
       runtime: Runtime.NODEJS_22_X,
       entry: path.join(getLambdaDir, 'index.js'),
@@ -76,7 +128,19 @@ export class LambdaStack extends cdk.Stack {
       timeout: Duration.seconds(29),
       projectRoot: getLambdaDir,
       depsLockFilePath: path.join(getLambdaDir, 'package-lock.json'),
+        // vpc,
+        // vpcSubnets: {
+        //     subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        // },
+        // securityGroups: [getLambdaSecurityGroup],
     });
+    //
+    //   rdsSg.addIngressRule(
+    //       getLambdaSecurityGroup,
+    //       aws_ec2.Port.tcp(5432),
+    //       "Allow Lambda to connect"
+    //   );
+
 
     new LambdaRouteConnection(this, 'PreferencesGetRoute', {
       lambdaFunction: getLambda,
