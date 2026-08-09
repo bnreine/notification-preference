@@ -4,6 +4,8 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "lodash": "^4.17.21"
+    "@aws-sdk/client-secrets-manager": "^3.864.0",
+    "lodash": "^4.17.21",
+    "pg": "^8.16.3"
   }
 }

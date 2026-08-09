@@ -1,6 +1,7 @@
 {
   "name": "notification-preference-list",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "dependencies": {
     "lodash": "^4.17.21"
