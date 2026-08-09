@@ -1,7 +1,7 @@
 const listEvent = {
     "version": "2.0",
     "routeKey": "GET /configurations/{configurationId}/preferences",
-    "rawPath": "/configurations/{configurationId}/preferences",
+    "rawPath": "/configurations/e75883fb-9270-4902-89a5-8c1fb67bbcd3/preferences",
     "rawQueryString": "",
     "headers": {
         "accept": "application/json;v=2",
@@ -23,7 +23,7 @@ const listEvent = {
         "authorizer": {
             "jwt": {
                 "claims": {
-                    "sub": "12345678"
+                    "sub": "44085488-0091-707c-2208-9b6753027a15"
                 }
             }
         },
@@ -42,7 +42,10 @@ const listEvent = {
         "time": "21/May/2026:20:10:53 +0000",
         "timeEpoch": 1779394253327
     },
-    "isBase64Encoded": false
+    "isBase64Encoded": false,
+    "pathParameters": {
+        "configurationId": 'e75883fb-9270-4902-89a5-8c1fb67bbcd3',
+    },
 }
 
 
