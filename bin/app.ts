@@ -7,7 +7,7 @@ const app = new cdk.App();
 
 new PipelineStack(app, 'NotificationPreferencePipelineStack', {
   env: {
-    account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: process.env.CDK_DEFAULT_REGION,
+    account: "010273536955",
+    region: 'us-east-1',
   },
 });

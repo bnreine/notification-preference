@@ -10,15 +10,18 @@ import { LambdaRouteConnection } from './lambda-route-connection';
 
 const API_GATEWAY_ID_SSM_PARAMETER = '/notifications/apigateway/api2/id';
 
+export interface LambdaStackProps extends cdk.StackProps {
+    /**
+     * CodeStar Connections ARN for the Git provider (GitHub, GitLab, Bitbucket).
+     * Create one in the AWS Console under Developer Tools > Connections.
+     */
+
+}
+
+
 export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
-
-      const vpcId = ssm.StringParameter.valueForStringParameter(
-          this,
-          '/shared-resources/vpc-id',
-      );
 
 
       const vpc = aws_ec2.Vpc.fromLookup(this, 'Vpc', {

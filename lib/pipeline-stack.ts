@@ -44,6 +44,29 @@ export class PipelineStack extends cdk.Stack {
         }),
         commands: ['npm ci', 'npm run build', 'npx cdk synth'],
       }),
+        synthCodeBuildDefaults: {
+            rolePolicy: [
+                new cdk.aws_iam.PolicyStatement({
+                    effect: cdk.aws_iam.Effect.ALLOW,
+                    actions: [
+                        'sts:AssumeRole',
+                        'iam:PassRole',
+                    ],
+                    resources: ['arn:aws:iam::*:role/cdk-*'],
+                }),
+
+                new cdk.aws_iam.PolicyStatement({
+                    effect: cdk.aws_iam.Effect.ALLOW,
+                    actions: [
+                        'ec2:DescribeVpcs',
+                        'ec2:DescribeSubnets',
+                        'ec2:DescribeRouteTables',
+                        'ec2:DescribeAvailabilityZones',
+                    ],
+                    resources: ['*'],
+                }),
+            ],
+        },
     });
 
     pipeline.addStage(
