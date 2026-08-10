@@ -133,7 +133,19 @@ export class LambdaStack extends cdk.Stack {
       timeout: Duration.seconds(29),
       projectRoot: postLambdaDir,
       depsLockFilePath: path.join(postLambdaDir, 'package-lock.json'),
+      layers: [sharedLayer],
+      bundling: {
+        externalModules: ['/opt/*'],
+        format: OutputFormat.ESM,
+      },
+      vpc,
+      vpcSubnets: {
+        subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
+      },
+      securityGroups: [lambdaSecurityGroup],
     });
+
+    writeReadRDSdbSecret.grantRead(postLambda);
 
     new LambdaRouteConnection(this, 'PreferencesPostRoute', {
       lambdaFunction: postLambda,
