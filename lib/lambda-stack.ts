@@ -102,11 +102,11 @@ export class LambdaStack extends cdk.Stack {
         securityGroups: [lambdaSecurityGroup],
     });
 
-    // const writeReadRDSdbSecret = secretsmanager.Secret.fromSecretNameV2(
-    //   this,
-    //   'DbSecret',
-    //   'write_read_rds_db',
-    // );
+    const writeReadRDSdbSecret = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      'DbSecret',
+      'write_read_rds_db',
+    );
 
       const readOnlyRDSdbSecret = secretsmanager.Secret.fromSecretNameV2(
           this,
@@ -194,7 +194,19 @@ export class LambdaStack extends cdk.Stack {
       timeout: Duration.seconds(29),
       projectRoot: deleteLambdaDir,
       depsLockFilePath: path.join(deleteLambdaDir, 'package-lock.json'),
+      layers: [sharedLayer],
+      bundling: {
+        externalModules: ['/opt/*'],
+        format: OutputFormat.ESM,
+      },
+      vpc,
+      vpcSubnets: {
+        subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
+      },
+      securityGroups: [lambdaSecurityGroup],
     });
+
+    writeReadRDSdbSecret.grantRead(deleteLambda);
 
     new LambdaRouteConnection(this, 'PreferencesDeleteRoute', {
       lambdaFunction: deleteLambda,
