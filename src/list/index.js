@@ -24,7 +24,7 @@ export const handler = async (event) => {
             .addLink('self', resourceHref)
             .addEmbed('configurationPreferences', configPreferences);
 
-        return { statusCode: 200, body: JSON.stringify(resource) };
+        return { statusCode: 200, body: JSON.stringify(resource), headers: { 'Content-Type': 'application/json' }, };
     } catch (e) {
         return {
             statusCode: 500,

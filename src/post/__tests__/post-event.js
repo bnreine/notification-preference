@@ -47,7 +47,7 @@ const postEvent = {
         "configurationId": 'e75883fb-9270-4902-89a5-8c1fb67bbcd3',
     },
     "body": JSON.stringify({
-        channel: 'sms7',
+        channel: 'sms',
     }),
 }
 

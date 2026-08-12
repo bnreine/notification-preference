@@ -36,7 +36,7 @@ export const handler = async (event) => {
         const resourceHref = `${protocol}://${host}/configurations/${configurationId}/preferences/${preference.Id}`;
         const resource = hal(preference).addLink('self', resourceHref);
 
-        return { statusCode: 200, body: JSON.stringify(resource) };
+        return { statusCode: 200, body: JSON.stringify(resource), headers: { 'Content-Type': 'application/json' }, };
 
     } catch (err) {
         return res.status(500).json({
