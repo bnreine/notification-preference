@@ -70,7 +70,10 @@ export class LambdaStack extends cdk.Stack {
           description: 'Shared code for notification API lambdas',
       });
 
-
+      new ssm.StringParameter(this, "SharedLayerArnParameter", {
+          parameterName: "/notifications/shared-layer/arn",
+          stringValue: sharedLayer.layerVersionArn,
+      });
 
     const listLambdaDir = path.join(__dirname, '../../src/list');
     const postLambdaDir = path.join(__dirname, '../../src/post');
