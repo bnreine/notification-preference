@@ -41,6 +41,7 @@ export class LambdaStack extends cdk.Stack {
           { mutable: true }
       );
 
+
     const apiId = ssm.StringParameter.valueForStringParameter(
       this,
       API_GATEWAY_ID_SSM_PARAMETER,
