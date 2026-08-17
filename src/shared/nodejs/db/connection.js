@@ -36,26 +36,35 @@ const getDbPool = async (secretName) => {
       idleTimeoutMillis: 30000,
     };
 
-    const poolConfig =
-      process.env.NODE_ENV === 'dev'
-        ? {
-            host: 'localhost',
-            ...baseConfig,
-            ssl: {
-              rejectUnauthorized: false,
-            },
-          }
-        : {
-            host: secret.host,
-            ...baseConfig,
-            ssl: {
-              ca: readFileSync(
+    let poolConfig = {
+        host: secret.host,
+        ...baseConfig,
+        ssl: {
+            ca: readFileSync(
                 join(__dirname, '../certs/global-bundle.pem'),
                 'utf-8',
-              ),
-              rejectUnauthorized: true,
+            ),
+            rejectUnauthorized: true,
+        },
+    }
+
+    if(process.env.NODE_ENV === 'dev'){
+        poolConfig = {
+            host: 'localhost',
+        ...baseConfig,
+            ssl: {
+            rejectUnauthorized: false,
+        },
+        }
+    } else if(process.env.NODE_ENV === 'sam-local'){
+        poolConfig = {
+            host: 'host.docker.internal',
+            ...baseConfig,
+            ssl: {
+                rejectUnauthorized: false,
             },
-          };
+        }
+      }
 
     dbPool = new Pool({
       ...poolConfig,
