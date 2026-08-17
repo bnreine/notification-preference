@@ -72,6 +72,7 @@ export const handler = async (event) => {
             };
         }
 
+
         const id = randomUUID();
         const insertResult = await dbPool.query(
             'INSERT INTO "NotificationPreference" ("Id", "userId", "channel", "configId") VALUES ($1, $2, $3, $4) RETURNING *',
