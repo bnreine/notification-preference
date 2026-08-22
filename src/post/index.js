@@ -80,8 +80,8 @@ export const handler = async (event) => {
 
         const id = randomUUID();
         const insertResult = await dbPool.query(
-            'INSERT INTO "NotificationPreference" ("Id", "userId", "channel", "configId", "destinationId") VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [id, "", "", configurationId, destinationId],
+            'INSERT INTO "NotificationPreference" ("Id", "configId", "destinationId") VALUES ($1, $2, $3) RETURNING *',
+            [id, configurationId, destinationId],
         );
 
         const preference = insertResult.rows[0];
