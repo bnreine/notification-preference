@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { getDbPool } from '/opt/nodejs/db/connection.js';
 // import { getDbPool} from '../shared/nodejs/db/connection.js'
 import hal from 'halson'
@@ -12,9 +11,10 @@ export const handler = async (event) => {
         const dbPool = await getDbPool('readonly_rds_db');
 
         const response = await dbPool.query(
-            'SELECT * FROM "NotificationPreference" WHERE "Id" = $1 AND "userId" = $2 AND "configId"=$3',
-            [preferenceId, userId, configurationId]
+            `SELECT np."configId", np."destinationId", true as "enabled", CONCAT(d."metadata"->>'workspaceName', '-',d."metadata"->>'channelName') as "destinationName" FROM "NotificationPreference" as np left join "Destination" as d on np."destinationId" = d."id" WHERE np."Id" = $1 AND np."configId"=$2 AND d."userId" = $3`,
+            [preferenceId, configurationId, userId]
         );
+
 
         if (
             response.rows.length === 0
@@ -33,29 +33,12 @@ export const handler = async (event) => {
         const headers = event.headers;
         const { host, 'x-forwarded-proto': protocol } = headers;
 
-        const resourceHref = `${protocol}://${host}/configurations/${configurationId}/preferences/${preference.Id}`;
+        const resourceHref = `${protocol}://${host}/configurations/${configurationId}/preferences/${preferenceId}`;
         const resource = hal(preference).addLink('self', resourceHref);
 
         return { statusCode: 200, body: JSON.stringify(resource), headers: { 'Content-Type': 'application/json' }, };
 
     } catch (err) {
-        return res.status(500).json({
-            error: {details : err.message, message: "internal server error"}
-        });
+        return { statusCode: 500, body: JSON.stringify({error: {details : err.message, message: "internal server error"}}), headers: { 'Content-Type': 'application/json' }, }
     }
-
-
-
-
-
-  return {
-    statusCode: 200,
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      message: `${greeting} from notification-preference get`,
-      configurationId,
-      preferenceId,
-      lodashVersion: _.VERSION,
-    }),
-  };
 };
