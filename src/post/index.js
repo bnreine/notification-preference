@@ -2,20 +2,26 @@ import { randomUUID } from 'node:crypto';
 import { getDbPool } from '/opt/nodejs/db/connection.js';
 // import { getDbPool} from '../shared/nodejs/db/connection.js'
 import hal from 'halson';
-import { Validator } from 'jsonschema';
 
-const validator = new Validator();
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
+const ajv = new Ajv();
+addFormats(ajv);
 
 const bodySchema = {
-    type: 'object',
+    type: "object",
     properties: {
-        channel: {
-            type: 'string',
-            enum: ['sms', 'whatsapp', 'slack'],
-        },
+        destinationId: {
+            type: "string",
+            format: "uuid"
+        }
     },
-    required: ['channel'],
+    required: ["destinationId"],
+    additionalProperties: false
 };
+
+const validate = ajv.compile(bodySchema);
 
 export const handler = async (event) => {
     try {
@@ -24,20 +30,19 @@ export const handler = async (event) => {
 
         const body = JSON.parse(event.body);
 
-        const validation = validator.validate(body, bodySchema);
-        if (!validation.valid) {
+        if (!validate(body)) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({
                     error: {
                         message: 'Validation failed.',
-                        details: validation.errors.map((error) => error.message),
+                        details: validate.errors?.map((error) => error.message),
                     },
                 }),
             };
         }
 
-        const { channel } = body;
+        const { destinationId } = body;
         const dbPool = await getDbPool('write_read_rds_db');
 
         const config = await dbPool.query(
@@ -57,8 +62,8 @@ export const handler = async (event) => {
         }
 
         const existing = await dbPool.query(
-            'SELECT * FROM "NotificationPreference" WHERE "userId" = $1 AND "configId" = $2 AND "channel" = $3',
-            [userId, configurationId, channel]
+            'SELECT * FROM "NotificationPreference" WHERE "configId" = $1 AND "destinationId" = $2',
+            [configurationId, destinationId]
         );
 
         if (existing.rows.length > 0) {
@@ -66,7 +71,7 @@ export const handler = async (event) => {
                 statusCode: 409,
                 body: JSON.stringify({
                     error: {
-                        message: 'A preference with this channel already exists for this configuration.',
+                        message: 'A preference with this destinationId already exists for this configuration.',
                     },
                 }),
             };
@@ -75,8 +80,8 @@ export const handler = async (event) => {
 
         const id = randomUUID();
         const insertResult = await dbPool.query(
-            'INSERT INTO "NotificationPreference" ("Id", "userId", "channel", "configId") VALUES ($1, $2, $3, $4) RETURNING *',
-            [id, userId, channel, configurationId]
+            'INSERT INTO "NotificationPreference" ("Id", "userId", "channel", "configId", "destinationId") VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [id, "", "", configurationId, destinationId],
         );
 
         const preference = insertResult.rows[0];
