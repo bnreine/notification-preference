@@ -6,7 +6,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "postinstall": "npm ci --prefix src/list && npm ci --prefix src/put && npm ci --prefix src/post && npm ci --prefix src/get && npm ci --prefix src/delete && npm ci --prefix src/shared/nodejs",
+    "postinstall": "npm ci --prefix src/list && npm ci --prefix src/put && npm ci --prefix src/get && npm ci --prefix src/shared/nodejs",
     "build": "tsc",
     "watch": "tsc -w",
     "cdk": "cdk",
