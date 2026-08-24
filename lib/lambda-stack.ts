@@ -79,6 +79,7 @@ export class LambdaStack extends cdk.Stack {
     const postLambdaDir = path.join(__dirname, '../../src/post');
     const getLambdaDir = path.join(__dirname, '../../src/get');
     const deleteLambdaDir = path.join(__dirname, '../../src/delete');
+      const putLambdaDir = path.join(__dirname, '../../src/put');
 
 
       const lambdaSecurityGroup = new aws_ec2.SecurityGroup(this, 'LambdaSecurityGroup', {
@@ -181,11 +182,6 @@ export class LambdaStack extends cdk.Stack {
             subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
         },
         securityGroups: [lambdaSecurityGroup],
-        // vpc,
-        // vpcSubnets: {
-        //     subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
-        // },
-        // securityGroups: [getLambdaSecurityGroup],
     });
 
 
@@ -198,7 +194,7 @@ export class LambdaStack extends cdk.Stack {
       region: this.region,
       apiId,
       routeKey:
-        'GET /configurations/{configurationId}/preferences/{preferenceId}',
+        'GET /configurations/{configurationId}/preferences/{destinationId}',
       authorizationType: defaultAuthorizerType,
       authorizerId: defaultAuthorizerId,
     });
@@ -234,6 +230,38 @@ export class LambdaStack extends cdk.Stack {
       authorizerId: defaultAuthorizerId,
     });
 
+
+
+      const putLambda = new NodejsFunction(this, 'PreferencesPutLambda', {
+          runtime: Runtime.NODEJS_22_X,
+          entry: path.join(putLambdaDir, 'index.js'),
+          handler: 'handler',
+          timeout: Duration.seconds(29),
+          projectRoot: putLambdaDir,
+          depsLockFilePath: path.join(putLambdaDir, 'package-lock.json'),
+          layers: [sharedLayer],
+          bundling: {
+              externalModules: ['/opt/*'],
+              format: OutputFormat.ESM,
+          },
+          vpc,
+          vpcSubnets: {
+              subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
+          },
+          securityGroups: [lambdaSecurityGroup],
+      });
+
+      writeReadRDSdbSecret.grantRead(putLambda);
+
+      new LambdaRouteConnection(this, 'PreferencesPutRoute', {
+          lambdaFunction: putLambda,
+          region: this.region,
+          apiId,
+          routeKey:
+              'PUT /configurations/{configurationId}/preferences/{destinationId}',
+          authorizationType: defaultAuthorizerType,
+          authorizerId: defaultAuthorizerId,
+      });
 
       rdsSg.addIngressRule(
           lambdaSecurityGroup,
