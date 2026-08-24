@@ -41,6 +41,9 @@ export const handler = async (event) => {
         if (!validate({...body, destinationId, configurationId})) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     error: {
                         message: 'Validation failed.',
@@ -68,6 +71,9 @@ export const handler = async (event) => {
         if (config.rows.length === 0 || destination.rows.length === 0) {
             return {
                 statusCode: 404,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     error: {
                         message: 'Not found.',
@@ -130,6 +136,9 @@ export const handler = async (event) => {
     } catch (e) {
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
                 error: { message: e.message },
             }),

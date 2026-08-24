@@ -21,6 +21,9 @@ export const handler = async (event) => {
         ) {
             return {
                 statusCode: 404,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     error: {
                         message: 'Not found.',
