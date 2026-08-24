@@ -48,7 +48,7 @@ const putEvent = {
         "destinationId": "6990b336-4a1d-42a0-86b9-6e65a36a0a72"
     },
     "body": JSON.stringify({
-        enabled: true,
+        enabled: false,
     }),
 }
 

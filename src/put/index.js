@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { getDbPool } from '/opt/nodejs/db/connection.js';
-// import { getDbPool} from '../shared/nodejs/db/connection.js'
+// import { getDbPool } from '/opt/nodejs/db/connection.js';
+import { getDbPool} from '../shared/nodejs/db/connection.js'
 import hal from 'halson';
 
 import Ajv from 'ajv';
@@ -87,7 +87,7 @@ export const handler = async (event) => {
         const { host, 'x-forwarded-proto': protocol } = event.headers;
         const resourceHref = `${protocol}://${host}/configurations/${configurationId}/preferences/${destinationId}`;
 
-        const resource = {id: destinationId, enabled, configId: configurationId, name: `${destinationItem.metadata.workspaceName}-${destinationItem.metadata.channelName}`}
+        const resource = {id: destinationId, enabled, configId: configurationId, channelType: destinationItem.channelType, name: `${destinationItem.metadata.workspaceName}-${destinationItem.metadata.channelName}`}
         const returnResource = hal(resource).addLink('self', resourceHref);
 
         if(enabled){
