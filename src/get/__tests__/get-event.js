@@ -45,7 +45,7 @@ const getEvent = {
     "isBase64Encoded": false,
     "pathParameters": {
         "configurationId": 'e75883fb-9270-4902-89a5-8c1fb67bbcd3',
-        "preferenceId": "f7eccb8c-95da-4899-81b4-27246fb5fc64"
+        "destinationId": "6990b336-4a1d-42a0-86b9-6e65a36a0a72"
     },
 }
 
