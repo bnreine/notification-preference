@@ -56,47 +56,83 @@ export const handler = async (event) => {
 
         const dbPool = await getDbPool('write_read_rds_db');
 
-        const config = await dbPool.query(
-            'SELECT * FROM "NotificationConfig" WHERE "userId" = $1 AND "Id" = $2',
-            [userId, configurationId]
-        );
+        const client = await dbPool.connect();
 
-        const destination = await dbPool.query(
-            'SELECT * FROM "Destination" WHERE "userId" = $1 AND "id" = $2',
-            [userId, destinationId]
-        );
+        let returnResource = {}
 
-        const destinationItem = destination.rows[0];
+        try {
+            await client.query('BEGIN');
 
-        if (config.rows.length === 0 || destination.rows.length === 0) {
-            return {
-                statusCode: 404,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    error: {
-                        message: 'Not found.',
-                    },
-                }),
-            };
-        }
-
-        const { enabled } = body;
-
-        const { host, 'x-forwarded-proto': protocol } = event.headers;
-        const resourceHref = `${protocol}://${host}/configurations/${configurationId}/preferences/${destinationId}`;
-
-        const resource = {id: destinationId, enabled, configId: configurationId, channelType: destinationItem.channelType, name: `${destinationItem.metadata.workspaceName}-${destinationItem.metadata.channelName}`}
-        const returnResource = hal(resource).addLink('self', resourceHref);
-
-        if(enabled){
-            const existingPreferenceQueryResult = await dbPool.query(
-                'SELECT * FROM "NotificationPreference" WHERE "configId" = $1 AND "destinationId" = $2',
-                [configurationId, destinationId]
+            const config = await dbPool.query(
+                'SELECT * FROM "NotificationConfig" WHERE "userId" = $1 AND "Id" = $2',
+                [userId, configurationId]
             );
 
-            if(existingPreferenceQueryResult.rows.length !== 0){
+            const destination = await dbPool.query(
+                `SELECT *,
+                        case
+                            when d."channelType" = 'slack' then CONCAT(d."metadata" ->>'workspaceName', ' | ',
+                                                                       d."metadata" ->>'channelName')
+                            when d."channelType" in ('whatsapp', 'sms') then d."metadata" ->>'phoneNumber'
+                            else '' end as "name"
+                 FROM "Destination" as d
+                 WHERE "userId" = $1
+                   AND "id" = $2`,
+                [userId, destinationId]
+            );
+
+            const destinationItem = destination.rows[0];
+
+            if (config.rows.length === 0 || destination.rows.length === 0) {
+                return {
+                    statusCode: 404,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        error: {
+                            message: 'Not found.',
+                        },
+                    }),
+                };
+            }
+
+            const {enabled} = body;
+
+            const {host, 'x-forwarded-proto': protocol} = event.headers;
+            const resourceHref = `${protocol}://${host}/configurations/${configurationId}/preferences/${destinationId}`;
+
+            const resource = {
+                id: destinationId,
+                enabled,
+                configId: configurationId,
+                channelType: destinationItem.channelType,
+                name: destinationItem.name
+            }
+            returnResource = hal(resource).addLink('self', resourceHref);
+
+            if (enabled) {
+                const existingPreferenceQueryResult = await dbPool.query(
+                    'SELECT * FROM "NotificationPreference" WHERE "configId" = $1 AND "destinationId" = $2',
+                    [configurationId, destinationId]
+                );
+
+                if (existingPreferenceQueryResult.rows.length !== 0) {
+                    return {
+                        statusCode: 200,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(returnResource),
+                    };
+                }
+
+                const id = randomUUID();
+                await dbPool.query(
+                    'INSERT INTO "NotificationPreference" ("Id", "configId", "destinationId") VALUES ($1, $2, $3) RETURNING *',
+                    [id, configurationId, destinationId],
+                );
+
                 return {
                     statusCode: 200,
                     headers: {
@@ -106,25 +142,20 @@ export const handler = async (event) => {
                 };
             }
 
-            const id = randomUUID();
             await dbPool.query(
-                'INSERT INTO "NotificationPreference" ("Id", "configId", "destinationId") VALUES ($1, $2, $3) RETURNING *',
-                [id, configurationId, destinationId],
+                'DELETE FROM "NotificationPreference" where "destinationId" = $1 AND "configId" = $2',
+                [destinationId, configurationId]
             );
 
-            return {
-                statusCode: 200,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(returnResource),
-            };
+            await client.query('COMMIT');
+
+        } catch (err) {
+            await client.query('ROLLBACK');
+            throw err;
+        } finally {
+            client.release();
         }
 
-        await dbPool.query(
-            'DELETE FROM "NotificationPreference" where "destinationId" = $1 AND "configId" = $2',
-            [ destinationId, configurationId]
-        );
 
         return {
             statusCode: 200,

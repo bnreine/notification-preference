@@ -45,10 +45,10 @@ const putEvent = {
     "isBase64Encoded": false,
     "pathParameters": {
         "configurationId": 'e75883fb-9270-4902-89a5-8c1fb67bbcd3',
-        "destinationId": "6990b336-4a1d-42a0-86b9-6e65a36a0a72"
+        "destinationId": "15dd158d-7e2a-419d-a787-c5148a5e82e8"
     },
     "body": JSON.stringify({
-        enabled: false,
+        enabled: true,
     }),
 }
 
