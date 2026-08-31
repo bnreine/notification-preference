@@ -112,40 +112,28 @@ export const handler = async (event) => {
             returnResource = hal(resource).addLink('self', resourceHref);
 
             if (enabled) {
-                const existingPreferenceQueryResult = await dbPool.query(
-                    'SELECT * FROM "NotificationPreference" WHERE "configId" = $1 AND "destinationId" = $2',
-                    [configurationId, destinationId]
-                );
-
-                if (existingPreferenceQueryResult.rows.length !== 0) {
-                    return {
-                        statusCode: 200,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(returnResource),
-                    };
-                }
 
                 const id = randomUUID();
                 await dbPool.query(
-                    'INSERT INTO "NotificationPreference" ("Id", "configId", "destinationId") VALUES ($1, $2, $3) RETURNING *',
-                    [id, configurationId, destinationId],
+                    `
+    INSERT INTO "NotificationPreference" (
+      "Id",
+      "configId",
+      "destinationId"
+    )
+    VALUES ($1, $2, $3)
+    ON CONFLICT ("destinationId", "configId") DO NOTHING
+    RETURNING *
+  `,
+                    [id, configurationId, destinationId]
+                );
+            } else {
+                await dbPool.query(
+                    'DELETE FROM "NotificationPreference" where "destinationId" = $1 AND "configId" = $2',
+                    [destinationId, configurationId]
                 );
 
-                return {
-                    statusCode: 200,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(returnResource),
-                };
             }
-
-            await dbPool.query(
-                'DELETE FROM "NotificationPreference" where "destinationId" = $1 AND "configId" = $2',
-                [destinationId, configurationId]
-            );
 
             await client.query('COMMIT');
 
