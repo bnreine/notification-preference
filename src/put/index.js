@@ -69,15 +69,15 @@ export const handler = async (event) => {
             );
 
             const destination = await dbPool.query(
-                `SELECT *,
+                `SELECT d."channelType" as "channelType",
                         case
-                            when d."channelType" = 'slack' then CONCAT(d."metadata" ->>'workspaceName', ' | ',
+                            when d."channelType" = 'slack' then CONCAT(oa."authData" ->>'workspaceName', ' | ',
                                                                        d."metadata" ->>'channelName')
                             when d."channelType" in ('whatsapp', 'sms') then d."metadata" ->>'phoneNumber'
                             else '' end as "name"
-                 FROM "Destination" as d
-                 WHERE "userId" = $1
-                   AND "id" = $2`,
+                 FROM "Destination" as d left join "OAuthConnection" as oa on oa."id" = d."oAuthConnectionId"
+                 WHERE d."userId" = $1
+                   AND d."id" = $2`,
                 [userId, destinationId]
             );
 

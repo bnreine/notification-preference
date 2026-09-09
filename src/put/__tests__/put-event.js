@@ -44,8 +44,8 @@ const putEvent = {
     },
     "isBase64Encoded": false,
     "pathParameters": {
-        "configurationId": 'e75883fb-9270-4902-89a5-8c1fb67bbcd3',
-        "destinationId": "15dd158d-7e2a-419d-a787-c5148a5e82e8"
+        "configurationId": 'eca99db7-5e5b-4b56-9b99-7971a578a359',
+        "destinationId": "5109057c-75c7-437f-8047-52c51a4ca009"
     },
     "body": JSON.stringify({
         enabled: true,
