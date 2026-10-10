@@ -44,7 +44,7 @@ const listEvent = {
     },
     "isBase64Encoded": false,
     "pathParameters": {
-        "configurationId": '416f9213-579c-4ae1-a7da-52cc9f8567ca',
+        "configurationId": 'cd38d39c-9a65-494a-be2d-c70ca8817667',
     },
 }
 

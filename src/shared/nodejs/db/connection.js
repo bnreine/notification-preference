@@ -6,6 +6,7 @@ import {
   SecretsManagerClient,
   GetSecretValueCommand,
 } from '@aws-sdk/client-secrets-manager';
+import fs from "fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -17,53 +18,56 @@ const getDbPool = async (secretName) => {
   }
 
   try {
-    const secretClient = new SecretsManagerClient({});
 
-    const response = await secretClient.send(
-      new GetSecretValueCommand({
-        SecretId: secretName,
-      }),
-    );
+      let poolConfig
+      if(process.env.NODE_ENV === 'dev') {
 
-    const secret = JSON.parse(response.SecretString);
+          poolConfig = {
+              host: 'localhost',
+              port: 5432,
+              database: 'notification',
+              user: 'postgres',
+              password: 'postgres',
+              max: 5,
+              idleTimeoutMillis: 30000,
+          }
 
-    const baseConfig = {
-      port: secret.port,
-      database: secret.dbname,
-      user: secret.username,
-      password: secret.password,
-      max: 5,
-      idleTimeoutMillis: 30000,
-    };
+      } else if (process.env.NODE_ENV === 'test') {
+          poolConfig = {
+              host: 'localhost',
+              port: 5433,
+              database: 'notification',
+              user: 'postgres',
+              password: 'postgres',
+              max: 5,
+              idleTimeoutMillis: 30000,
+          }
+      } else {
+          const secretClient = new SecretsManagerClient({});
 
-    let poolConfig = {
-        host: secret.host,
-        ...baseConfig,
-        ssl: {
-            ca: readFileSync(
-                join(__dirname, '../certs/global-bundle.pem'),
-                'utf-8',
-            ),
-            rejectUnauthorized: true,
-        },
-    }
+          const response = await secretClient.send(
+              new GetSecretValueCommand({
+                  SecretId: 'write_read_rds_db',
+              })
+          );
 
-    if(process.env.NODE_ENV === 'dev'){
-        poolConfig = {
-            host: 'localhost',
-        ...baseConfig,
-            ssl: {
-            rejectUnauthorized: false,
-        },
-        }
-    } else if(process.env.NODE_ENV === 'sam-local'){
-        poolConfig = {
-            host: 'host.docker.internal',
-            ...baseConfig,
-            ssl: {
-                rejectUnauthorized: false,
-            },
-        }
+          const secret = JSON.parse(response.SecretString);
+
+          poolConfig =
+              {
+                  host: secret.host,
+                  port: secret.port,
+                  database: secret.dbname,
+                  user: secret.username,
+                  password: secret.password,
+                  max: 5,
+                  idleTimeoutMillis: 30000,
+                  ssl: {
+                      ca: fs.readFileSync(`${__dirname}/../certs/global-bundle.pem`, 'utf-8'),
+                      rejectUnauthorized: true
+                  }
+              }
+
       }
 
     dbPool = new Pool({
