@@ -46,7 +46,7 @@ const getDbPool = async (secretName) => {
 
           const response = await secretClient.send(
               new GetSecretValueCommand({
-                  SecretId: 'write_read_rds_db',
+                  SecretId: secretName,
               })
           );
 
