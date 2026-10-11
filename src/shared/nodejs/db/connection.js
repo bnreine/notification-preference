@@ -6,7 +6,6 @@ import {
   SecretsManagerClient,
   GetSecretValueCommand,
 } from '@aws-sdk/client-secrets-manager';
-import fs from "fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -63,9 +62,12 @@ const getDbPool = async (secretName) => {
                   max: 5,
                   idleTimeoutMillis: 30000,
                   ssl: {
-                      ca: fs.readFileSync(`${__dirname}/../certs/global-bundle.pem`, 'utf-8'),
-                      rejectUnauthorized: true
-                  }
+                      ca: readFileSync(
+                          join(__dirname, '../certs/global-bundle.pem'),
+                          'utf-8',
+                      ),
+                      rejectUnauthorized: true,
+                  },
               }
 
       }
