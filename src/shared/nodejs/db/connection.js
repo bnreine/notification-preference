@@ -22,7 +22,7 @@ const getDbPool = async (secretName) => {
       if(process.env.NODE_ENV === 'dev') {
 
           poolConfig = {
-              host: 'localhost',
+              host: 'postgres-dev',
               port: 5432,
               database: 'notification',
               user: 'postgres',
@@ -33,7 +33,7 @@ const getDbPool = async (secretName) => {
 
       } else if (process.env.NODE_ENV === 'test') {
           poolConfig = {
-              host: 'localhost',
+              host: 'postgres-test',
               port: 5433,
               database: 'notification',
               user: 'postgres',

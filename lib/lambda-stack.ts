@@ -103,6 +103,9 @@ export class LambdaStack extends cdk.Stack {
             subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
         },
         securityGroups: [lambdaSecurityGroup],
+        environment: {
+            // NODE_ENV: "dev",
+        }
     });
 
     const writeReadRDSdbSecret = secretsmanager.Secret.fromSecretNameV2(
