@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
 import { getDbPool } from '/opt/nodejs/db/connection.js';
-// import { getDbPool} from '../shared/nodejs/db/connection.js'
 import hal from 'halson';
 
 import Ajv from 'ajv';
@@ -27,6 +26,7 @@ const schema = {
     required: ["destinationId", "configurationId", "enabled"],
     additionalProperties: false
 };
+
 
 const validate = ajv.compile(schema);
 

@@ -10,6 +10,7 @@ export const handler = async (event) => {
 
         const dbPool = await getDbPool('readonly_rds_db');
 
+
         const response = await dbPool.query(
             `SELECT d."id" as "id", np."Id" IS NOT NULL AS "enabled", nc."Id" as "configId", CONCAT(d."metadata"->>'workspaceName', '-',d."metadata"->>'channelName') as "name" FROM "Destination" as d inner join "NotificationConfig" as nc on d."userId" = nc."userId" left join "NotificationPreference" as np on np."destinationId" = d."id" and np."configId" = nc."Id" where nc."userId"=$1 and nc."Id"=$2 and d."id"=$3`,
             [userId, configurationId, destinationId, ]

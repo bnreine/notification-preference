@@ -1,6 +1,5 @@
 import { getDbPool } from '/opt/nodejs/db/connection.js';
 import hal from 'halson'
-// import { getDbPool} from '../shared/nodejs/db/connection.js'
 
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
@@ -19,6 +18,7 @@ const schema = {
     required: ["configurationId"],
     additionalProperties: false
 };
+
 
 const validate = ajv.compile(schema);
 
